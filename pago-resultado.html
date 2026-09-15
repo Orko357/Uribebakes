@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Resultado del pago — Uribebakes</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="favicon.png" type="image/png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,700&family=Caveat:wght@700&family=Manrope:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --brown-900:#2B1710; --cream-050:#FFF8ED; --cream-100:#FBE9C7;
+    --raspberry-500:#D6336C; --marigold-500:#E8A33D; --cocoa-700:#4A2E1D;
+    --gradient-brand:linear-gradient(120deg, var(--raspberry-500), var(--marigold-500));
+    --shadow-soft:0 12px 30px rgba(43,23,16,.18);
+    --font-display:'Fraunces', serif; --font-script:'Caveat', cursive; --font-body:'Manrope', sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{ margin:0; min-height:100vh; display:flex; align-items:center; justify-content:center; background:var(--cream-050); font-family:var(--font-body); color:var(--cocoa-700); padding:24px; }
+  .card{ background:#fff; border-radius:24px; padding:44px 36px; max-width:440px; text-align:center; box-shadow:var(--shadow-soft); }
+  .brand{ font-size:1.5rem; margin-bottom:18px; }
+  .brand-uribe{ font-family:var(--font-display); font-weight:700; background:var(--gradient-brand); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .brand-bakes{ font-family:var(--font-script); font-weight:700; color:var(--brown-900); font-size:1.25em; }
+  .icon{ font-size:3rem; margin-bottom:10px; }
+  h1{ font-family:var(--font-display); color:var(--brown-900); font-size:1.5rem; margin:0 0 10px; }
+  p{ line-height:1.55; }
+  .btn{ display:inline-block; margin-top:22px; padding:13px 26px; border-radius:999px; font-weight:700; text-decoration:none; }
+  .btn-primary{ background:var(--gradient-brand); color:#fff; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="brand"><span class="brand-uribe">Uribe</span><span class="brand-bakes">Bakes</span></div>
+    <div id="content">
+      <p>Confirmando el resultado de tu pago...</p>
+    </div>
+  </div>
+
+<script>
+  const params = new URLSearchParams(window.location.search);
+  const status = params.get('status');
+  const content = document.getElementById('content');
+
+  const views = {
+    success: { icon:'🎉', title:'¡Pago confirmado!', text:'Gracias por tu pedido. Te avisamos por WhatsApp en cuanto esté listo.' },
+    pending: { icon:'⏳', title:'Pago en revisión', text:'Tu pago está pendiente de confirmación (por ejemplo, si pagaste con Rapipago o Pago Fácil). Te avisamos apenas se acredite.' },
+    failure: { icon:'😕', title:'El pago no se pudo completar', text:'No te preocupes, tu pedido quedó guardado. Podés intentar pagar de nuevo desde "Mi cuenta" o escribirnos por WhatsApp.' },
+  };
+
+  const view = views[status] || { icon:'❓', title:'Resultado no disponible', text:'No pudimos determinar el estado del pago. Si te descontaron dinero, escribinos por WhatsApp para confirmarlo.' };
+
+  content.innerHTML = `
+    <div class="icon" aria-hidden="true">${view.icon}</div>
+    <h1>${view.title}</h1>
+    <p>${view.text}</p>
+    <a class="btn btn-primary" href="app.html">Ver mi pedido</a><br>
+    <a class="btn" href="index.html" style="color:var(--brown-900);">Volver al sitio</a>
+  `;
+</script>
+</body>
+</html>
