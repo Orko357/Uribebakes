@@ -803,6 +803,7 @@ document.getElementById('checkoutForm').addEventListener('submit', async (e) => 
       profile_id: userId,
       channel: 'web',
       fulfillment: fulfillment,
+      payment_status: 'pendiente',
       contact_name: document.getElementById('chkName').value,
       contact_phone: document.getElementById('chkPhone').value,
       contact_address: fulfillment === 'envio_propio' ? document.getElementById('chkAddress').value : null,
@@ -816,8 +817,18 @@ document.getElementById('checkoutForm').addEventListener('submit', async (e) => 
     CART = [];
     saveCart();
     msg.style.color = 'green';
-    msg.textContent = '¡Pedido confirmado! Te contactamos por WhatsApp para coordinar.';
-    setTimeout(() => { closeCheckout(); msg.textContent=''; submitBtn.disabled=false; }, 2200);
+    msg.textContent = 'Pedido guardado. Redirigiendo a Mercado Pago...';
+
+    const { data: prefData, error: prefError } = await db.functions.invoke('create-preference', {
+      body: { order_id: order.id }
+    });
+    if (prefError || !prefData || !prefData.init_point){
+      msg.style.color = '#B32656';
+      msg.textContent = 'El pedido se guardó, pero no pudimos abrir Mercado Pago. Te contactamos por WhatsApp para coordinar el pago.';
+      submitBtn.disabled = false;
+      return;
+    }
+    window.location.href = prefData.init_point;
 
   }catch(err){
     msg.style.color = '#B32656';
