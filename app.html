@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mi cuenta — Uribebakes</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="favicon.png" type="image/png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Caveat:wght@600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --brown-900:#2B1710; --brown-800:#3A2116; --cream-050:#FFF8ED; --cream-100:#FBE9C7;
+    --raspberry-500:#D6336C; --raspberry-600:#B32656; --marigold-500:#E8A33D; --cocoa-700:#4A2E1D;
+    --white:#FFFFFF; --gradient-brand:linear-gradient(120deg, var(--raspberry-500), var(--marigold-500));
+    --shadow-soft:0 12px 30px rgba(43,23,16,.18); --radius-lg:24px; --radius-md:14px;
+    --font-display:'Fraunces', serif; --font-script:'Caveat', cursive; --font-body:'Manrope', sans-serif;
+    --ok:#2F7D4F; --warn:#C0392B;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; font-family:var(--font-body); color:var(--cocoa-700); background:var(--cream-050);}
+  h1,h2,h3{font-family:var(--font-display); color:var(--brown-900); margin:0 0 .4em;}
+  button{font-family:inherit; cursor:pointer;}
+  a{color:inherit;}
+  :focus-visible{outline:3px solid var(--raspberry-500); outline-offset:2px;}
+  .skip-link{position:absolute; left:-9999px; top:0; background:var(--brown-900); color:#fff; padding:.75em 1.2em; z-index:200;}
+  .skip-link:focus{left:0;}
+  .visually-hidden{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0);}
+  .hidden{display:none !important;}
+
+  .topbar{display:flex; align-items:center; justify-content:space-between; padding:14px 24px; background:var(--white); border-bottom:1px solid var(--cream-100);}
+  .brand{display:flex; align-items:baseline; gap:2px; font-size:1.4rem; text-decoration:none;}
+  .brand-uribe{font-family:var(--font-display); font-weight:700; background:var(--gradient-brand); -webkit-background-clip:text; background-clip:text; color:transparent;}
+  .brand-bakes{font-family:var(--font-script); font-weight:700; color:var(--brown-900); font-size:1.25em;}
+  .topbar-actions{display:flex; align-items:center; gap:16px; font-size:.9rem; font-weight:600;}
+  .topbar-actions a{text-decoration:underline;}
+  #logoutBtn{background:none; border:2px solid var(--brown-900); border-radius:999px; padding:8px 16px; font-weight:700;}
+
+  .auth-wrap{max-width:420px; margin:60px auto; background:var(--white); border-radius:var(--radius-lg); padding:36px; box-shadow:var(--shadow-soft);}
+  .toggle-row{display:flex; gap:10px; margin-bottom:24px;}
+  .toggle-row button{flex:1; padding:10px; border-radius:10px; border:2px solid var(--cream-100); background:var(--white); font-weight:700;}
+  .toggle-row button[aria-pressed="true"]{background:var(--brown-900); color:#fff; border-color:var(--brown-900);}
+  .field{margin-bottom:16px;}
+  label{display:block; font-weight:700; font-size:.86rem; margin-bottom:6px;}
+  input,select,textarea{width:100%; padding:11px 13px; border-radius:10px; border:2px solid var(--cream-100); font-family:inherit; font-size:.95rem;}
+  input:focus,select:focus,textarea:focus{border-color:var(--raspberry-500);}
+  .btn{display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:12px 22px; border-radius:999px; font-weight:700; border:none; text-decoration:none;}
+  .btn-primary{background:var(--gradient-brand); color:#fff; width:100%;}
+  .btn-outline{background:none; border:2px solid var(--brown-900); color:var(--brown-900);}
+  .btn-small{padding:8px 14px; font-size:.82rem; border-radius:999px;}
+  .form-msg{font-size:.88rem; font-weight:700; margin-top:10px;}
+
+  .app-wrap{max-width:1180px; margin:0 auto; padding:28px 24px 60px;}
+  .tabs{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:28px; border-bottom:2px solid var(--cream-100); padding-bottom:0;}
+  .tab-btn{padding:12px 18px; border:none; background:none; font-weight:700; color:var(--brown-800); border-bottom:3px solid transparent; margin-bottom:-2px;}
+  .tab-btn[aria-selected="true"]{color:var(--raspberry-500); border-bottom-color:var(--raspberry-500);}
+  .panel{display:none;}
+  .panel.active{display:block;}
+
+  .card{background:var(--white); border-radius:var(--radius-md); padding:20px; box-shadow:var(--shadow-soft); margin-bottom:20px;}
+  .grid-2{display:grid; grid-template-columns:1fr 1fr; gap:20px;}
+  @media (max-width:760px){.grid-2{grid-template-columns:1fr;}}
+
+  table{width:100%; border-collapse:collapse; font-size:.9rem;}
+  th,td{text-align:left; padding:10px 8px; border-bottom:1px solid var(--cream-100);}
+  th{font-size:.78rem; text-transform:uppercase; letter-spacing:.03em; color:var(--brown-800);}
+  .status-pill{padding:4px 10px; border-radius:999px; font-size:.76rem; font-weight:700; display:inline-block;}
+  .status-recibido{background:#FDE9C8; color:#8A5620;}
+  .status-en_preparacion{background:#FCE0EA; color:var(--raspberry-600);}
+  .status-listo{background:#DCEFE0; color:var(--ok);}
+  .status-entregado{background:#E4E4E4; color:#555;}
+  .status-cancelado{background:#F8D7D7; color:var(--warn);}
+  .low-stock{color:var(--warn); font-weight:700;}
+  .kanban{display:grid; grid-template-columns:repeat(5,1fr); gap:14px;}
+  @media (max-width:960px){.kanban{grid-template-columns:1fr 1fr;}}
+  .kanban-col h4{font-size:.85rem; text-transform:uppercase; letter-spacing:.03em; margin-bottom:10px;}
+  .order-card{background:var(--cream-050); border-radius:10px; padding:12px; margin-bottom:10px; cursor:pointer; border:1px solid var(--cream-100);}
+  .order-card:hover{border-color:var(--raspberry-500);}
+  .order-card small{color:var(--brown-800);}
+  .channel-tag{font-size:.68rem; font-weight:700; text-transform:uppercase; color:var(--raspberry-500);}
+
+  .modal-overlay{position:fixed; inset:0; background:rgba(43,23,16,.5); z-index:200; display:none; align-items:flex-start; justify-content:center; overflow-y:auto; padding:40px 16px;}
+  .modal-overlay.open{display:flex;}
+  .modal-box{background:#fff; border-radius:var(--radius-lg); padding:28px; max-width:560px; width:100%; box-shadow:var(--shadow-soft); position:relative;}
+  .modal-close{position:absolute; top:14px; right:16px; background:none; border:none; font-size:1.3rem;}
+  .filters{display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap;}
+  .filters select{width:auto;}
+  .toolbar{display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:18px;}
+  .stat-box{background:var(--brown-900); color:#fff; border-radius:var(--radius-md); padding:18px 20px;}
+  .stat-box strong{display:block; font-family:var(--font-display); font-size:1.6rem;}
+  .stat-row{display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:24px;}
+  @media (max-width:860px){.stat-row{grid-template-columns:1fr 1fr;}}
+  canvas{max-width:100%;}
+
+  @media (prefers-reduced-motion: reduce){ *{transition:none !important;} }
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">Saltar al contenido principal</a>
+<div id="live-region" class="visually-hidden" aria-live="polite"></div>
+
+<header class="topbar">
+  <a href="index.html" class="brand"><span class="brand-uribe">Uribe</span><span class="brand-bakes">Bakes</span></a>
+  <div class="topbar-actions">
+    <a href="index.html">← Volver al sitio</a>
+    <button id="logoutBtn" class="hidden">Cerrar sesión</button>
+  </div>
+</header>
+
+<main id="main">
+
+<!-- AUTH -->
+<section id="authSection" class="auth-wrap">
+  <div class="toggle-row" role="group" aria-label="Elegir acción">
+    <button type="button" id="showLogin" aria-pressed="true">Iniciar sesión</button>
+    <button type="button" id="showSignup" aria-pressed="false">Crear cuenta</button>
+  </div>
+
+  <form id="loginForm">
+    <h2>Bienvenido de nuevo</h2>
+    <div class="field"><label for="loginEmail">Email</label><input type="email" id="loginEmail" required></div>
+    <div class="field"><label for="loginPass">Contraseña</label><input type="password" id="loginPass" required></div>
+    <button type="submit" class="btn btn-primary">Iniciar sesión</button>
+    <p class="form-msg" id="loginMsg" role="status"></p>
+  </form>
+
+  <form id="signupForm" class="hidden">
+    <h2>Creá tu cuenta</h2>
+    <div class="grid-2">
+      <div class="field"><label for="suFirst">Nombre</label><input type="text" id="suFirst" required></div>
+      <div class="field"><label for="suLast">Apellido</label><input type="text" id="suLast" required></div>
+    </div>
+    <div class="field"><label for="suPhone">Teléfono</label><input type="tel" id="suPhone" required></div>
+    <div class="field"><label for="suAddress">Dirección (opcional)</label><input type="text" id="suAddress"></div>
+    <div class="field"><label for="suEmail">Email</label><input type="email" id="suEmail" required></div>
+    <div class="field"><label for="suPass">Contraseña</label><input type="password" id="suPass" minlength="6" required></div>
+    <button type="submit" class="btn btn-primary">Crear cuenta</button>
+    <p class="form-msg" id="signupMsg" role="status"></p>
+  </form>
+</section>
+
+<!-- VISTA PARTICULAR -->
+<section id="clientSection" class="app-wrap hidden">
+  <h1 id="clientGreeting">Tus pedidos</h1>
+  <div class="card">
+    <h3>Cupones de fidelidad</h3>
+    <p id="couponsSummary">Cargando...</p>
+    <div id="couponsList"></div>
+  </div>
+  <div class="card">
+    <h3>Historial de pedidos</h3>
+    <table>
+      <thead><tr><th>Fecha</th><th>Productos</th><th>Total</th><th>Estado</th></tr></thead>
+      <tbody id="clientOrdersBody"></tbody>
+    </table>
+  </div>
+</section>
+
+<!-- PANEL ADMIN -->
+<section id="adminSection" class="app-wrap hidden">
+  <h1>Panel de administración</h1>
+  <div class="tabs" role="tablist">
+    <button class="tab-btn" role="tab" data-panel="panelPedidos" aria-selected="true">Pedidos</button>
+    <button class="tab-btn" role="tab" data-panel="panelStock" aria-selected="false">Stock</button>
+    <button class="tab-btn" role="tab" data-panel="panelProductos" aria-selected="false">Productos</button>
+    <button class="tab-btn" role="tab" data-panel="panelMayoristas" aria-selected="false">Clientes Mayoristas</button>
+    <button class="tab-btn" role="tab" data-panel="panelStats" aria-selected="false">Estadísticas</button>
+  </div>
+
+  <!-- PEDIDOS -->
+  <div class="panel active" id="panelPedidos">
+    <div class="toolbar">
+      <div class="filters">
+        <select id="channelFilter">
+          <option value="">Todos los canales</option>
+          <option value="web">Web</option>
+          <option value="whatsapp">WhatsApp</option>
+          <option value="rappi">Rappi</option>
+          <option value="pedidosya">PedidosYa</option>
+          <option value="mostrador">Mostrador</option>
+        </select>
+      </div>
+      <button class="btn btn-outline btn-small" id="newOrderBtn">+ Cargar pedido manual</button>
+    </div>
+    <div class="kanban" id="kanban"></div>
+  </div>
+
+  <!-- STOCK -->
+  <div class="panel" id="panelStock">
+    <div class="toolbar">
+      <h3 style="margin:0;">Insumos</h3>
+      <button class="btn btn-outline btn-small" id="newMovementBtn">+ Registrar movimiento</button>
+    </div>
+    <div class="card">
+      <table>
+        <thead><tr><th>Insumo</th><th>Stock actual</th><th>Mínimo</th><th>Costo unit.</th><th>Estado</th></tr></thead>
+        <tbody id="suppliesBody"></tbody>
+      </table>
+    </div>
+    <div class="card">
+      <h3>Historial de movimientos</h3>
+      <table>
+        <thead><tr><th>Fecha</th><th>Insumo</th><th>Tipo</th><th>Cantidad</th><th>Motivo</th></tr></thead>
+        <tbody id="movementsBody"></tbody>
+      </table>
+    </div>
+    <div class="card">
+      <h3>Recetario (consumo por producto)</h3>
+      <table>
+        <thead><tr><th>Producto</th><th>Insumo</th><th>Cantidad consumida</th></tr></thead>
+        <tbody id="recipeBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- PRODUCTOS -->
+  <div class="panel" id="panelProductos">
+    <div class="toolbar">
+      <h3 style="margin:0;">Productos</h3>
+      <button class="btn btn-outline btn-small" id="newProductBtn">+ Nuevo producto</button>
+    </div>
+    <div class="card">
+      <table>
+        <thead><tr><th>Nombre</th><th>Categoría</th><th>Precio minorista</th><th>Precio mayorista</th><th>Activo</th><th></th></tr></thead>
+        <tbody id="productsBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- MAYORISTAS -->
+  <div class="panel" id="panelMayoristas">
+    <div class="toolbar">
+      <h3 style="margin:0;">Clientes mayoristas</h3>
+      <button class="btn btn-outline btn-small" id="newWholesaleBtn">+ Nuevo cliente mayorista</button>
+    </div>
+    <div class="card">
+      <table>
+        <thead><tr><th>Comercio</th><th>Contacto</th><th>Descuento</th><th>Pedido mínimo</th></tr></thead>
+        <tbody id="wholesaleBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ESTADÍSTICAS -->
+  <div class="panel" id="panelStats">
+    <div class="toolbar">
+      <div class="filters">
+        <label for="statsFrom" class="visually-hidden">Desde</label>
+        <input type="date" id="statsFrom">
+        <label for="statsTo" class="visually-hidden">Hasta</label>
+        <input type="date" id="statsTo">
+        <button class="btn btn-outline btn-small" id="statsRunBtn">Calcular</button>
+      </div>
+    </div>
+    <div class="stat-row" id="statBoxes"></div>
+    <div class="card"><canvas id="statsChart" height="110"></canvas></div>
+    <div class="grid-2">
+      <div class="card">
+        <h3>Ranking particulares</h3>
+        <table><thead><tr><th>Cliente</th><th>Pedidos</th><th>Total</th></tr></thead><tbody id="rankParticularBody"></tbody></table>
+      </div>
+      <div class="card">
+        <h3>Ranking mayoristas</h3>
+        <table><thead><tr><th>Comercio</th><th>Pedidos</th><th>Total</th></tr></thead><tbody id="rankWholesaleBody"></tbody></table>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Cupones generados</h3>
+      <table><thead><tr><th>Código</th><th>Cliente</th><th>Descuento</th><th>Estado</th><th></th></tr></thead><tbody id="allCouponsBody"></tbody></table>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- MODAL genérico -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-box" id="modalBox"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<script>
+const SUPABASE_URL = 'https://TU-PROYECTO.supabase.co';
+const SUPABASE_ANON_KEY = 'TU-ANON-KEY';
+const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const money = (n) => new Intl.NumberFormat('es-AR', { style:'currency', currency:'ARS', maximumFractionDigits:0 }).format(n || 0);
+const fmtDate = (d) => new Date(d).toLocaleDateString('es-AR');
+const announce = (msg) => { document.getElementById('live-region').textContent = msg; };
+
+let session = null;
+let profile = null;
+let PRODUCTS_CACHE = [];
+let SUPPLIES_CACHE = [];
+let WHOLESALE_CACHE = [];
+
+/* ---------- Auth toggle (login/signup) ---------- */
+const showLoginBtn = document.getElementById('showLogin');
+const showSignupBtn = document.getElementById('showSignup');
+showLoginBtn.addEventListener('click', () => {
+  showLoginBtn.setAttribute('aria-pressed','true'); showSignupBtn.setAttribute('aria-pressed','false');
+  document.getElementById('loginForm').classList.remove('hidden');
+  document.getElementById('signupForm').classList.add('hidden');
+});
+showSignupBtn.addEventListener('click', () => {
+  showSignupBtn.setAttribute('aria-pressed','true'); showLoginBtn.setAttribute('aria-pressed','false');
+  document.getElementById('signupForm').classList.remove('hidden');
+  document.getElementById('loginForm').classList.add('hidden');
+});
+
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const msg = document.getElementById('loginMsg');
+  msg.style.color = ''; msg.textContent = 'Ingresando...';
+  const { error } = await db.auth.signInWithPassword({
+    email: document.getElementById('loginEmail').value,
+    password: document.getElementById('loginPass').value,
+  });
+  if (error){ msg.style.color = '#B32656'; msg.textContent = 'No pudimos iniciar sesión: ' + error.message; return; }
+  await bootstrap();
+});
+
+document.getElementById('signupForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const msg = document.getElementById('signupMsg');
+  msg.textContent = 'Creando cuenta...';
+  const { error } = await db.auth.signUp({
+    email: document.getElementById('suEmail').value,
+    password: document.getElementById('suPass').value,
+    options: { data: {
+      first_name: document.getElementById('suFirst').value,
+      last_name: document.getElementById('suLast').value,
+      phone: document.getElementById('suPhone').value,
+      address: document.getElementById('suAddress').value || null,
+    }}
+  });
+  if (error){ msg.style.color = '#B32656'; msg.textContent = 'No pudimos crear la cuenta: ' + error.message; return; }
+  await bootstrap();
+});
+
+document.getElementById('logoutBtn').addEventListener('click', async () => {
+  await db.auth.signOut();
+  window.location.reload();
+});
+
+/* ---------- Bootstrap: decide qué vista mostrar ---------- */
+async function bootstrap(){
+  const { data } = await db.auth.getSession();
+  session = data.session;
+  if (!session){
+    document.getElementById('authSection').classList.remove('hidden');
+    document.getElementById('clientSection').classList.add('hidden');
+    document.getElementById('adminSection').classList.add('hidden');
+    document.getElementById('logoutBtn').classList.add('hidden');
+    return;
+  }
+  document.getElementById('authSection').classList.add('hidden');
+  document.getElementById('logoutBtn').classList.remove('hidden');
+
+  const { data: prof } = await db.from('profiles').select('*').eq('id', session.user.id).single();
+  profile = prof;
+
+  if (profile && profile.role === 'admin'){
+    document.getElementById('adminSection').classList.remove('hidden');
+    initAdmin();
+  } else {
+    document.getElementById('clientSection').classList.remove('hidden');
+    initClient();
+  }
+}
+
+/* ---------- Vista cliente particular ---------- */
+async function initClient(){
+  document.getElementById('clientGreeting').textContent = `Hola, ${profile.first_name} 👋`;
+
+  const { data: coupons } = await db.from('coupons').select('*').eq('profile_id', session.user.id);
+  const active = (coupons || []).filter(c => c.status === 'activo');
+  document.getElementById('couponsSummary').textContent = active.length
+    ? `Tenés ${active.length} cupón(es) activo(s).`
+    : 'Todavía no tenés cupones. Cada 10 pedidos entregados, sumás uno del 20%.';
+  document.getElementById('couponsList').innerHTML = active.map(c =>
+    `<span class="status-pill status-listo">${c.code} — ${c.discount_pct}% off</span>`
+  ).join(' ');
+
+  const { data: orders } = await db.from('orders')
+    .select('*, order_items(*, products(name))')
+    .eq('profile_id', session.user.id)
+    .order('created_at', { ascending:false });
+
+  document.getElementById('clientOrdersBody').innerHTML = (orders || []).map(o => {
+    const items = (o.order_items || []).map(i => `${i.quantity}× ${i.products?.name || '—'}`).join(', ');
+    const total = (o.order_items || []).reduce((s,i)=>s+i.subtotal,0);
+    return `<tr><td>${fmtDate(o.created_at)}</td><td>${items}</td><td>${money(total)}</td>
+      <td><span class="status-pill status-${o.status}">${o.status}</span></td></tr>`;
+  }).join('') || '<tr><td colspan="4">Todavía no hiciste ningún pedido.</td></tr>';
+}
+
+/* ---------- Panel admin: tabs ---------- */
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.setAttribute('aria-selected', b === btn));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.getElementById(btn.dataset.panel).classList.add('active');
+  });
+});
+
+async function initAdmin(){
+  await Promise.all([loadOrders(), loadSupplies(), loadProducts(), loadWholesale()]);
+  subscribeRealtime();
+}
+
+/* ---------- Pedidos (kanban) ---------- */
+const STATUSES = ['recibido','en_preparacion','listo','entregado','cancelado'];
+const STATUS_LABELS = { recibido:'Recibido', en_preparacion:'En preparación', listo:'Listo', entregado:'Entregado', cancelado:'Cancelado' };
+let ORDERS_CACHE = [];
+
+async function loadOrders(){
+  const { data } = await db.from('orders')
+    .select('*, order_items(*, products(name)), profiles(first_name,last_name), wholesale_clients(business_name)')
+    .order('created_at', { ascending:false });
+  ORDERS_CACHE = data || [];
+  renderKanban();
+}
+
+function renderKanban(){
+  const filter = document.getElementById('channelFilter').value;
+  const kanban = document.getElementById('kanban');
+  const filtered = filter ? ORDERS_CACHE.filter(o => o.channel === filter) : ORDERS_CACHE;
+
+  kanban.innerHTML = STATUSES.map(status => {
+    const list = filtered.filter(o => o.status === status);
+    const cards = list.map(o => {
+      const buyer = o.profiles ? `${o.profiles.first_name} ${o.profiles.last_name}` : (o.wholesale_clients ? o.wholesale_clients.business_name : o.contact_name);
+      const total = (o.order_items || []).reduce((s,i)=>s+i.subtotal,0);
+      return `<div class="order-card" data-id="${o.id}">
+        <span class="channel-tag">${o.channel}</span>
+        <div><strong>${buyer}</strong></div>
+        <small>${money(total)} · ${fmtDate(o.created_at)}</small>
+      </div>`;
+    }).join('');
+    return `<div class="kanban-col"><h4>${STATUS_LABELS[status]} (${list.length})</h4>${cards}</div>`;
+  }).join('');
+
+  kanban.querySelectorAll('.order-card').forEach(card => {
+    card.addEventListener('click', () => openOrderModal(card.dataset.id));
+  });
+}
+document.getElementById('channelFilter').addEventListener('change', renderKanban);
+
+function openOrderModal(orderId){
+  const o = ORDERS_CACHE.find(x => x.id === orderId);
+  const buyer = o.profiles ? `${o.profiles.first_name} ${o.profiles.last_name}` : (o.wholesale_clients ? o.wholesale_clients.business_name : o.contact_name);
+  const items = (o.order_items || []).map(i => `<li>${i.quantity}× ${i.products?.name || '—'} — ${money(i.subtotal)}</li>`).join('');
+  const total = (o.order_items || []).reduce((s,i)=>s+i.subtotal,0);
+  const waLink = o.contact_phone ? `https://wa.me/54${o.contact_phone.replace(/\D/g,'')}?text=${encodeURIComponent('¡Hola! Tu pedido de Uribebakes está listo 🍪')}` : '#';
+
+  showModal(`
+    <h3>Pedido de ${buyer}</h3>
+    <p><strong>Canal:</strong> ${o.channel} · <strong>Entrega:</strong> ${o.fulfillment}</p>
+    <p><strong>Contacto:</strong> ${o.contact_name} — ${o.contact_phone}</p>
+    ${o.contact_address ? `<p><strong>Dirección:</strong> ${o.contact_address}</p>` : ''}
+    <ul>${items}</ul>
+    <p><strong>Total: ${money(total)}</strong></p>
+    <div class="field">
+      <label for="statusSelect">Estado</label>
+      <select id="statusSelect">${STATUSES.map(s => `<option value="${s}" ${s===o.status?'selected':''}>${STATUS_LABELS[s]}</option>`).join('')}</select>
+    </div>
+    <button class="btn btn-primary" id="saveStatusBtn" style="margin-bottom:10px;">Guardar estado</button>
+    <a class="btn btn-outline" href="${waLink}" target="_blank" rel="noopener">Avisar por WhatsApp</a>
+    <p class="form-msg" id="orderModalMsg" role="status"></p>
+  `);
+
+  document.getElementById('saveStatusBtn').addEventListener('click', async () => {
+    const newStatus = document.getElementById('statusSelect').value;
+    const { error } = await db.from('orders').update({ status: newStatus }).eq('id', o.id);
+    const msg = document.getElementById('orderModalMsg');
+    if (error){ msg.style.color = '#B32656'; msg.textContent = 'Error: ' + error.message; return; }
+    msg.style.color = 'green'; msg.textContent = 'Estado actualizado.';
+    await loadOrders();
+    setTimeout(closeModal, 700);
+  });
+}
+
+document.getElementById('newOrderBtn').addEventListener('click', () => {
+  const productOptions = PRODUCTS_CACHE.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+  const wholesaleOptions = WHOLESALE_CACHE.map(w => `<option value="${w.id}">${w.business_name}</option>`).join('');
+  showModal(`
+    <h3>Cargar pedido manual</h3>
+    <form id="manualOrderForm">
+      <div class="field">
+        <label for="buyerType">Tipo de comprador</label>
+        <select id="buyerType">
+          <option value="particular">Particular (sin cuenta)</option>
+          <option value="mayorista">Cliente mayorista</option>
+        </select>
+      </div>
+      <div class="field" id="wholesaleSelectField">
+        <label for="wholesaleSelect">Comercio</label>
+        <select id="wholesaleSelect">${wholesaleOptions}</select>
+      </div>
+      <div class="grid-2">
+        <div class="field"><label for="moContactName">Nombre de contacto</label><input type="text" id="moContactName" required></div>
+        <div class="field"><label for="moContactPhone">Teléfono</label><input type="tel" id="moContactPhone" required></div>
+      </div>
+      <div class="grid-2">
+        <div class="field">
+          <label for="moChannel">Canal</label>
+          <select id="moChannel"><option value="whatsapp">WhatsApp</option><option value="rappi">Rappi</option><option value="pedidosya">PedidosYa</option><option value="mostrador">Mostrador</option></select>
+        </div>
+        <div class="field">
+          <label for="moFulfillment">Entrega</label>
+          <select id="moFulfillment"><option value="retiro">Retiro</option><option value="envio_propio">Envío propio</option><option value="rappi">Delivery Rappi</option><option value="pedidosya">Delivery PedidosYa</option></select>
+        </div>
+      </div>
+      <div class="field"><label for="moAddress">Dirección (si aplica)</label><input type="text" id="moAddress"></div>
+      <div class="field">
+        <label for="moProduct">Producto</label>
+        <select id="moProduct">${productOptions}</select>
+      </div>
+      <div class="field"><label for="moQty">Cantidad</label><input type="number" id="moQty" min="1" value="1" required></div>
+      <button type="submit" class="btn btn-primary">Crear pedido</button>
+      <p class="form-msg" id="manualOrderMsg" role="status"></p>
+    </form>
+  `);
+
+  document.getElementById('buyerType').addEventListener('change', (e) => {
+    document.getElementById('wholesaleSelectField').classList.toggle('hidden', e.target.value !== 'mayorista');
+  });
+
+  document.getElementById('manualOrderForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const msg = document.getElementById('manualOrderMsg');
+    const isWholesale = document.getElementById('buyerType').value === 'mayorista';
+    const product = PRODUCTS_CACHE.find(p => p.id === document.getElementById('moProduct').value);
+    const qty = Number(document.getElementById('moQty').value);
+    const unitPrice = isWholesale ? product.price_wholesale : product.price_retail;
+
+    const payload = {
+      channel: document.getElementById('moChannel').value,
+      fulfillment: document.getElementById('moFulfillment').value,
+      contact_name: document.getElementById('moContactName').value,
+      contact_phone: document.getElementById('moContactPhone').value,
+      contact_address: document.getElementById('moAddress').value || null,
+    };
+    if (isWholesale){ payload.wholesale_client_id = document.getElementById('wholesaleSelect').value; }
+    else { payload.wholesale_client_id = null; }
+
+    const { data: order, error } = await db.from('orders').insert(payload).select().single();
+    if (error){ msg.style.color = '#B32656'; msg.textContent = error.message; return; }
+
+    const { error: itemErr } = await db.from('order_items').insert({ order_id: order.id, product_id: product.id, quantity: qty, unit_price: unitPrice });
+    if (itemErr){ msg.style.color = '#B32656'; msg.textContent = itemErr.message; return; }
+
+    msg.style.color = 'green'; msg.textContent = 'Pedido cargado.';
+    await loadOrders();
+    setTimeout(closeModal, 700);
+  });
+});
+
+/* ---------- Stock ---------- */
+async function loadSupplies(){
+  const { data } = await db.from('supplies').select('*').order('name');
+  SUPPLIES_CACHE = data || [];
+  document.getElementById('suppliesBody').innerHTML = SUPPLIES_CACHE.map(s => `
+    <tr>
+      <td>${s.name}</td>
+      <td class="${s.stock_current <= s.stock_min ? 'low-stock' : ''}">${s.stock_current} ${s.unit}</td>
+      <td>${s.stock_min} ${s.unit}</td>
+      <td>${money(s.unit_cost)}</td>
+      <td>${s.stock_current <= s.stock_min ? '<span class="status-pill status-cancelado">Bajo</span>' : '<span class="status-pill status-listo">OK</span>'}</td>
+    </tr>`).join('');
+
+  const { data: moves } = await db.from('supply_movements').select('*, supplies(name)').order('created_at', { ascending:false }).limit(30);
+  document.getElementById('movementsBody').innerHTML = (moves || []).map(m => `
+    <tr><td>${fmtDate(m.created_at)}</td><td>${m.supplies?.name || '—'}</td><td>${m.movement_type}</td><td>${m.quantity}</td><td>${m.reason || '—'}</td></tr>
+  `).join('');
+
+  const { data: recipe } = await db.from('product_supply_usage').select('*, products(name), supplies(name, unit)');
+  document.getElementById('recipeBody').innerHTML = (recipe || []).map(r => `
+    <tr><td>${r.products?.name}</td><td>${r.supplies?.name}</td><td>${r.quantity} ${r.supplies?.unit}</td></tr>
+  `).join('');
+}
+
+document.getElementById('newMovementBtn').addEventListener('click', () => {
+  const options = SUPPLIES_CACHE.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+  showModal(`
+    <h3>Registrar movimiento de stock</h3>
+    <form id="movementForm">
+      <div class="field"><label for="mvSupply">Insumo</label><select id="mvSupply">${options}</select></div>
+      <div class="field">
+        <label for="mvType">Tipo</label>
+        <select id="mvType"><option value="manual_in">Entrada (compra)</option><option value="manual_out">Salida (rotura/uso interno)</option></select>
+      </div>
+      <div class="field"><label for="mvQty">Cantidad</label><input type="number" id="mvQty" min="0" step="0.01" required></div>
+      <div class="field"><label for="mvReason">Motivo</label><input type="text" id="mvReason" required></div>
+      <button type="submit" class="btn btn-primary">Guardar</button>
+      <p class="form-msg" id="movementMsg" role="status"></p>
+    </form>
+  `);
+  document.getElementById('movementForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const msg = document.getElementById('movementMsg');
+    const { error } = await db.from('supply_movements').insert({
+      supply_id: document.getElementById('mvSupply').value,
+      movement_type: document.getElementById('mvType').value,
+      quantity: Number(document.getElementById('mvQty').value),
+      reason: document.getElementById('mvReason').value,
+      created_by: session.user.id,
+    });
+    if (error){ msg.style.color = '#B32656'; msg.textContent = error.message; return; }
+    msg.style.color = 'green'; msg.textContent = 'Movimiento registrado.';
+    await loadSupplies();
+    setTimeout(closeModal, 700);
+  });
+});
+
+/* ---------- Productos ---------- */
+async function loadProducts(){
+  const { data } = await db.from('products').select('*').order('category');
+  PRODUCTS_CACHE = data || [];
+  document.getElementById('productsBody').innerHTML = PRODUCTS_CACHE.map(p => `
+    <tr>
+      <td>${p.name}</td><td>${p.category}</td><td>${money(p.price_retail)}</td><td>${money(p.price_wholesale)}</td>
+      <td>${p.active ? 'Sí' : 'No'}</td>
+      <td><button class="btn btn-outline btn-small" data-edit="${p.id}">Editar</button></td>
+    </tr>`).join('');
+  document.querySelectorAll('[data-edit]').forEach(btn => btn.addEventListener('click', () => openProductModal(btn.dataset.edit)));
+}
+
+function openProductModal(id){
+  const p = id ? PRODUCTS_CACHE.find(x => x.id === id) : null;
+  showModal(`
+    <h3>${p ? 'Editar producto' : 'Nuevo producto'}</h3>
+    <form id="productForm">
+      <div class="field"><label for="pName">Nombre</label><input type="text" id="pName" value="${p ? p.name : ''}" required></div>
+      <div class="field"><label for="pCategory">Categoría</label><input type="text" id="pCategory" value="${p ? p.category : ''}" required></div>
+      <div class="field">
+        <label for="pUnit">Tipo de unidad</label>
+        <select id="pUnit">
+          ${['individual','cuchareable','box','kg'].map(u => `<option value="${u}" ${p && p.unit_type===u ? 'selected':''}>${u}</option>`).join('')}
+        </select>
+      </div>
+      <div class="grid-2">
+        <div class="field"><label for="pRetail">Precio minorista</label><input type="number" id="pRetail" value="${p ? p.price_retail : ''}" required></div>
+        <div class="field"><label for="pWholesale">Precio mayorista</label><input type="number" id="pWholesale" value="${p ? p.price_wholesale : ''}" required></div>
+      </div>
+      <div class="field"><label for="pActive">Activo</label><select id="pActive"><option value="true" ${!p || p.active ? 'selected':''}>Sí</option><option value="false" ${p && !p.active ? 'selected':''}>No</option></select></div>
+      <button type="submit" class="btn btn-primary">Guardar</button>
+      <p class="form-msg" id="productMsg" role="status"></p>
+    </form>
+  `);
+  document.getElementById('productForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const msg = document.getElementById('productMsg');
+    const payload = {
+      name: document.getElementById('pName').value,
+      category: document.getElementById('pCategory').value,
+      unit_type: document.getElementById('pUnit').value,
+      price_retail: Number(document.getElementById('pRetail').value),
+      price_wholesale: Number(document.getElementById('pWholesale').value),
+      active: document.getElementById('pActive').value === 'true',
+    };
+    const { error } = p ? await db.from('products').update(payload).eq('id', p.id) : await db.from('products').insert(payload);
+    if (error){ msg.style.color = '#B32656'; msg.textContent = error.message; return; }
+    msg.style.color = 'green'; msg.textContent = 'Guardado.';
+    await loadProducts();
+    setTimeout(closeModal, 700);
+  });
+}
+document.getElementById('newProductBtn').addEventListener('click', () => openProductModal(null));
+
+/* ---------- Clientes mayoristas ---------- */
+async function loadWholesale(){
+  const { data } = await db.from('wholesale_clients').select('*').order('business_name');
+  WHOLESALE_CACHE = data || [];
+  document.getElementById('wholesaleBody').innerHTML = WHOLESALE_CACHE.map(w => `
+    <tr><td>${w.business_name}</td><td>${w.contact_name || '—'} · ${w.phone || '—'}</td><td>${w.discount_pct}%</td><td>${w.min_order_qty}</td></tr>
+  `).join('');
+}
+document.getElementById('newWholesaleBtn').addEventListener('click', () => {
+  showModal(`
+    <h3>Nuevo cliente mayorista</h3>
+    <form id="wholesaleForm">
+      <div class="field"><label for="wName">Comercio</label><input type="text" id="wName" required></div>
+      <div class="grid-2">
+        <div class="field"><label for="wContact">Contacto</label><input type="text" id="wContact"></div>
+        <div class="field"><label for="wPhone">Teléfono</label><input type="tel" id="wPhone"></div>
+      </div>
+      <div class="field"><label for="wAddress">Dirección</label><input type="text" id="wAddress"></div>
+      <div class="grid-2">
+        <div class="field"><label for="wDiscount">Descuento (%)</label><input type="number" id="wDiscount" value="20"></div>
+        <div class="field"><label for="wMin">Pedido mínimo</label><input type="number" id="wMin" value="0"></div>
+      </div>
+      <button type="submit" class="btn btn-primary">Guardar</button>
+      <p class="form-msg" id="wholesaleMsg" role="status"></p>
+    </form>
+  `);
+  document.getElementById('wholesaleForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const msg = document.getElementById('wholesaleMsg');
+    const { error } = await db.from('wholesale_clients').insert({
+      business_name: document.getElementById('wName').value,
+      contact_name: document.getElementById('wContact').value || null,
+      phone: document.getElementById('wPhone').value || null,
+      address: document.getElementById('wAddress').value || null,
+      discount_pct: Number(document.getElementById('wDiscount').value),
+      min_order_qty: Number(document.getElementById('wMin').value),
+    });
+    if (error){ msg.style.color = '#B32656'; msg.textContent = error.message; return; }
+    msg.style.color = 'green'; msg.textContent = 'Cliente guardado.';
+    await loadWholesale();
+    setTimeout(closeModal, 700);
+  });
+});
+
+/* ---------- Estadísticas ---------- */
+let chartInstance = null;
+document.getElementById('statsRunBtn').addEventListener('click', runStats);
+
+async function runStats(){
+  const from = document.getElementById('statsFrom').value;
+  const to = document.getElementById('statsTo').value;
+  let query = db.from('orders').select('*, order_items(*, products(name, category)), profiles(first_name,last_name), wholesale_clients(business_name)').eq('status','entregado');
+  if (from) query = query.gte('created_at', from);
+  if (to) query = query.lte('created_at', to + 'T23:59:59');
+  const { data: orders } = await query;
+
+  const byChannel = {};
+  const byProduct = {};
+  const particularRank = {};
+  const wholesaleRank = {};
+  let totalRevenue = 0, totalUnits = 0;
+
+  (orders || []).forEach(o => {
+    const orderTotal = (o.order_items || []).reduce((s,i)=>s+i.subtotal,0);
+    totalRevenue += orderTotal;
+    byChannel[o.channel] = (byChannel[o.channel] || 0) + orderTotal;
+
+    (o.order_items || []).forEach(i => {
+      totalUnits += Number(i.quantity);
+      const pname = i.products?.name || '—';
+      byProduct[pname] = (byProduct[pname] || 0) + i.subtotal;
+    });
+
+    if (o.profiles){
+      const key = `${o.profiles.first_name} ${o.profiles.last_name}`;
+      particularRank[key] = particularRank[key] || { count:0, total:0 };
+      particularRank[key].count++; particularRank[key].total += orderTotal;
+    }
+    if (o.wholesale_clients){
+      const key = o.wholesale_clients.business_name;
+      wholesaleRank[key] = wholesaleRank[key] || { count:0, total:0 };
+      wholesaleRank[key].count++; wholesaleRank[key].total += orderTotal;
+    }
+  });
+
+  document.getElementById('statBoxes').innerHTML = `
+    <div class="stat-box"><span>Total facturado</span><strong>${money(totalRevenue)}</strong></div>
+    <div class="stat-box"><span>Pedidos entregados</span><strong>${(orders||[]).length}</strong></div>
+    <div class="stat-box"><span>Unidades vendidas</span><strong>${totalUnits}</strong></div>
+    <div class="stat-box"><span>Canales activos</span><strong>${Object.keys(byChannel).length}</strong></div>
+  `;
+
+  const ctx = document.getElementById('statsChart');
+  if (chartInstance) chartInstance.destroy();
+  chartInstance = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: Object.keys(byProduct),
+      datasets: [{ label:'Facturación por producto', data:Object.values(byProduct), backgroundColor:'#D6336C' }]
+    },
+    options: { responsive:true, plugins:{ legend:{ display:false } } }
+  });
+
+  document.getElementById('rankParticularBody').innerHTML = Object.entries(particularRank)
+    .sort((a,b)=>b[1].total-a[1].total).map(([name,v]) => `<tr><td>${name}</td><td>${v.count}</td><td>${money(v.total)}</td></tr>`).join('') || '<tr><td colspan="3">Sin datos</td></tr>';
+  document.getElementById('rankWholesaleBody').innerHTML = Object.entries(wholesaleRank)
+    .sort((a,b)=>b[1].total-a[1].total).map(([name,v]) => `<tr><td>${name}</td><td>${v.count}</td><td>${money(v.total)}</td></tr>`).join('') || '<tr><td colspan="3">Sin datos</td></tr>';
+
+  const { data: coupons } = await db.from('coupons').select('*, profiles(first_name,last_name)');
+  document.getElementById('allCouponsBody').innerHTML = (coupons || []).map(c => `
+    <tr><td>${c.code}</td><td>${c.profiles ? c.profiles.first_name+' '+c.profiles.last_name : '—'}</td><td>${c.discount_pct}%</td>
+      <td><span class="status-pill status-${c.status==='activo'?'listo':'entregado'}">${c.status}</span></td>
+      <td>${c.status==='activo' ? `<button class="btn btn-outline btn-small" data-usecoupon="${c.id}">Marcar usado</button>` : ''}</td></tr>
+  `).join('');
+  document.querySelectorAll('[data-usecoupon]').forEach(btn => btn.addEventListener('click', async () => {
+    await db.from('coupons').update({ status:'usado' }).eq('id', btn.dataset.usecoupon);
+    runStats();
+  }));
+}
+
+/* ---------- Realtime ---------- */
+function subscribeRealtime(){
+  db.channel('orders-realtime')
+    .on('postgres_changes', { event:'*', schema:'public', table:'orders' }, () => { loadOrders(); })
+    .on('postgres_changes', { event:'*', schema:'public', table:'order_items' }, () => { loadOrders(); })
+    .subscribe();
+}
+
+/* ---------- Modal genérico ---------- */
+function showModal(html){
+  document.getElementById('modalBox').innerHTML = `<button class="modal-close" id="modalCloseBtn" aria-label="Cerrar">✕</button>${html}`;
+  document.getElementById('modalOverlay').classList.add('open');
+  document.getElementById('modalCloseBtn').addEventListener('click', closeModal);
+}
+function closeModal(){ document.getElementById('modalOverlay').classList.remove('open'); }
+document.getElementById('modalOverlay').addEventListener('click', (e) => { if (e.target.id === 'modalOverlay') closeModal(); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeModal(); });
+
+bootstrap();
+</script>
+</body>
+</html>
