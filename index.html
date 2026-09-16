@@ -606,9 +606,12 @@ function renderGrid(){
     const color = CATEGORY_COLORS[p.category] || '#E8A33D';
     const icon = CATEGORY_ICONS[p.category] || '🍪';
     const qty = getCartQty(p.id);
+    const photoInner = p.image_url
+      ? `<img src="${p.image_url}" alt="${p.name}" style="width:100%; height:100%; object-fit:cover;">`
+      : icon;
     return `
       <article class="product-card">
-        <div class="product-photo" style="background:${color}22;">${icon}</div>
+        <div class="product-photo" style="background:${color}22;">${photoInner}</div>
         <div class="product-body">
           <span class="product-cat">${p.category}</span>
           <h3 class="product-name">${p.name}</h3>

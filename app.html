@@ -227,7 +227,7 @@
     </div>
     <div class="card">
       <table>
-        <thead><tr><th>Nombre</th><th>Categoría</th><th>Precio minorista</th><th>Precio mayorista</th><th>Activo</th><th></th></tr></thead>
+        <thead><tr><th>Foto</th><th>Nombre</th><th>Categoría</th><th>Precio minorista</th><th>Precio mayorista</th><th>Activo</th><th></th></tr></thead>
         <tbody id="productsBody"></tbody>
       </table>
     </div>
@@ -629,6 +629,7 @@ async function loadProducts(){
   PRODUCTS_CACHE = data || [];
   document.getElementById('productsBody').innerHTML = PRODUCTS_CACHE.map(p => `
     <tr>
+      <td>${p.image_url ? `<img src="${p.image_url}" alt="" style="width:40px;height:40px;object-fit:cover;border-radius:8px;">` : '—'}</td>
       <td>${p.name}</td><td>${p.category}</td><td>${money(p.price_retail)}</td><td>${money(p.price_wholesale)}</td>
       <td>${p.active ? 'Sí' : 'No'}</td>
       <td><button class="btn btn-outline btn-small" data-edit="${p.id}">Editar</button></td>
@@ -654,6 +655,12 @@ function openProductModal(id){
         <div class="field"><label for="pWholesale">Precio mayorista</label><input type="number" id="pWholesale" value="${p ? p.price_wholesale : ''}" required></div>
       </div>
       <div class="field"><label for="pActive">Activo</label><select id="pActive"><option value="true" ${!p || p.active ? 'selected':''}>Sí</option><option value="false" ${p && !p.active ? 'selected':''}>No</option></select></div>
+      <div class="field">
+        <label for="pImage">Foto del producto</label>
+        ${p && p.image_url ? `<img src="${p.image_url}" alt="Foto actual de ${p.name}" style="width:100%; max-height:160px; object-fit:cover; border-radius:10px; margin-bottom:8px;">` : ''}
+        <input type="file" id="pImage" accept="image/*">
+        <small style="color:var(--brown-800);">JPG o PNG, hasta 3 MB. Si no subís nada, se mantiene la foto actual (o el ícono, si todavía no tiene).</small>
+      </div>
       <button type="submit" class="btn btn-primary">Guardar</button>
       <p class="form-msg" id="productMsg" role="status"></p>
     </form>
@@ -661,6 +668,9 @@ function openProductModal(id){
   document.getElementById('productForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     const msg = document.getElementById('productMsg');
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    submitBtn.disabled = true;
+
     const payload = {
       name: document.getElementById('pName').value,
       category: document.getElementById('pCategory').value,
@@ -669,8 +679,29 @@ function openProductModal(id){
       price_wholesale: Number(document.getElementById('pWholesale').value),
       active: document.getElementById('pActive').value === 'true',
     };
+
+    const file = document.getElementById('pImage').files[0];
+    if (file){
+      if (file.size > 3 * 1024 * 1024){
+        msg.style.color = '#B32656'; msg.textContent = 'La imagen pesa más de 3 MB, subí una más liviana.';
+        submitBtn.disabled = false;
+        return;
+      }
+      msg.style.color = ''; msg.textContent = 'Subiendo imagen...';
+      const ext = file.name.split('.').pop();
+      const path = `${crypto.randomUUID()}.${ext}`;
+      const { error: uploadError } = await db.storage.from('product-images').upload(path, file, { upsert: true });
+      if (uploadError){
+        msg.style.color = '#B32656'; msg.textContent = 'No pudimos subir la imagen: ' + uploadError.message;
+        submitBtn.disabled = false;
+        return;
+      }
+      const { data: publicUrlData } = db.storage.from('product-images').getPublicUrl(path);
+      payload.image_url = publicUrlData.publicUrl;
+    }
+
     const { error } = p ? await db.from('products').update(payload).eq('id', p.id) : await db.from('products').insert(payload);
-    if (error){ msg.style.color = '#B32656'; msg.textContent = error.message; return; }
+    if (error){ msg.style.color = '#B32656'; msg.textContent = error.message; submitBtn.disabled = false; return; }
     msg.style.color = 'green'; msg.textContent = 'Guardado.';
     await loadProducts();
     setTimeout(closeModal, 700);
