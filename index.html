@@ -538,6 +538,23 @@
   </form>
 </div>
 
+<!-- MODAL DE ADICIONALES -->
+<div class="modal" id="addonModal" role="dialog" aria-modal="true" aria-labelledby="addonTitle">
+  <button class="modal-close" id="addonClose" aria-label="Cerrar">✕</button>
+  <h3 id="addonTitle">Elegí tus adicionales</h3>
+  <p class="modal-sub" id="addonSub"></p>
+  <div id="addonOptions"></div>
+  <div class="qty-row" style="margin:18px 0;">
+    <span style="font-weight:700;">Cantidad</span>
+    <div class="stepper" id="addonQtyStepper">
+      <button type="button" id="addonQtyMinus" aria-label="Restar cantidad">−</button>
+      <span class="qty-val" id="addonQtyVal">1</span>
+      <button type="button" id="addonQtyPlus" aria-label="Sumar cantidad">+</button>
+    </div>
+  </div>
+  <button type="button" class="btn btn-primary" id="addonConfirmBtn" style="width:100%; justify-content:center;">Agregar al carrito</button>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
 document.getElementById('year').textContent = new Date().getFullYear();
@@ -606,24 +623,29 @@ function renderGrid(){
     const color = CATEGORY_COLORS[p.category] || '#E8A33D';
     const icon = CATEGORY_ICONS[p.category] || '🍪';
     const qty = getCartQty(p.id);
+    const hasAddons = Number(p.max_addons) > 0;
     const photoInner = p.image_url
       ? `<img src="${p.image_url}" alt="${p.name}" style="width:100%; height:100%; object-fit:cover;">`
       : icon;
+    const stepperOrButton = hasAddons
+      ? `<button type="button" class="add-btn" data-id="${p.id}" data-addons="1" style="width:100%;">Elegir y agregar</button>`
+      : `<div class="qty-row">
+          <span class="product-price">${money(p.price_retail)}</span>
+          <div class="stepper" data-id="${p.id}">
+            <button type="button" class="qty-minus" aria-label="Restar ${p.name}">−</button>
+            <span class="qty-val">${qty}</span>
+            <button type="button" class="qty-plus" aria-label="Sumar ${p.name}">+</button>
+          </div>
+        </div>
+        <button type="button" class="add-btn" data-id="${p.id}">Agregar al carrito</button>`;
     return `
       <article class="product-card">
         <div class="product-photo" style="background:${color}22;">${photoInner}</div>
         <div class="product-body">
           <span class="product-cat">${p.category}</span>
           <h3 class="product-name">${p.name}</h3>
-          <div class="qty-row">
-            <span class="product-price">${money(p.price_retail)}</span>
-            <div class="stepper" data-id="${p.id}">
-              <button type="button" class="qty-minus" aria-label="Restar ${p.name}">−</button>
-              <span class="qty-val">${qty}</span>
-              <button type="button" class="qty-plus" aria-label="Sumar ${p.name}">+</button>
-            </div>
-          </div>
-          <button type="button" class="add-btn" data-id="${p.id}">Agregar al carrito</button>
+          ${hasAddons ? `<span class="product-price">${money(p.price_retail)}</span>` : ''}
+          ${stepperOrButton}
         </div>
       </article>`;
   }).join('');
@@ -643,6 +665,10 @@ function renderGrid(){
   grid.querySelectorAll('.add-btn').forEach(b => b.addEventListener('click', () => {
     const id = b.dataset.id;
     const p = PRODUCTS.find(x => x.id === id);
+    if (b.dataset.addons === '1'){
+      openAddonModal(p);
+      return;
+    }
     if (getCartQty(id) === 0) addToCart(p, 1);
     openCart();
     renderGrid();
@@ -651,7 +677,12 @@ function renderGrid(){
 
 /* ---------- Carrito ---------- */
 let CART = JSON.parse(localStorage.getItem('uribebakes_cart') || '[]');
+CART = CART.map(i => ({ ...i, addons: i.addons || [], lineKey: i.lineKey || cartLineKey(i.id, i.addons || []) }));
 
+function cartLineKey(productId, addons){
+  const addonKey = (addons || []).map(a => a.name).sort().join('|');
+  return `${productId}::${addonKey}`;
+}
 function saveCart(){
   localStorage.setItem('uribebakes_cart', JSON.stringify(CART));
   renderCart();
@@ -662,19 +693,32 @@ function getCartQty(productId){
 }
 function addToCart(product, delta){
   if (!product) return;
-  let item = CART.find(i => i.id === product.id);
+  const key = cartLineKey(product.id, []);
+  let item = CART.find(i => i.lineKey === key);
   if (!item){
     if (delta <= 0) return;
-    item = { id: product.id, name: product.name, price: product.price_retail, qty: 0 };
+    item = { lineKey:key, id: product.id, name: product.name, price: product.price_retail, qty: 0, addons: [] };
     CART.push(item);
   }
   item.qty += delta;
-  if (item.qty <= 0) CART = CART.filter(i => i.id !== product.id);
+  if (item.qty <= 0) CART = CART.filter(i => i.lineKey !== key);
   saveCart();
   announce(`${product.name} actualizado en el carrito`);
 }
-function removeFromCart(id){
-  CART = CART.filter(i => i.id !== id);
+function addToCartWithAddons(product, qty, addons){
+  const key = cartLineKey(product.id, addons);
+  const unitPrice = Number(product.price_retail) + addons.reduce((s,a) => s + Number(a.price), 0);
+  let item = CART.find(i => i.lineKey === key);
+  if (!item){
+    item = { lineKey:key, id: product.id, name: product.name, price: unitPrice, qty: 0, addons };
+    CART.push(item);
+  }
+  item.qty += qty;
+  saveCart();
+  announce(`${product.name} agregado al carrito`);
+}
+function removeFromCart(lineKey){
+  CART = CART.filter(i => i.lineKey !== lineKey);
   saveCart();
   renderGrid();
 }
@@ -697,13 +741,78 @@ function renderCart(){
         <div class="cart-item-info">
           <strong>${i.name}</strong>
           <span>${i.qty} × ${money(i.price)}</span>
+          ${i.addons && i.addons.length ? `<br><small>+ ${i.addons.map(a=>a.name).join(', ')}</small>` : ''}
         </div>
-        <button class="cart-item-remove" data-id="${i.id}">Quitar</button>
+        <button class="cart-item-remove" data-key="${i.lineKey}">Quitar</button>
       </div>
     `).join('');
-    wrap.querySelectorAll('.cart-item-remove').forEach(b => b.addEventListener('click', () => removeFromCart(b.dataset.id)));
+    wrap.querySelectorAll('.cart-item-remove').forEach(b => b.addEventListener('click', () => removeFromCart(b.dataset.key)));
   }
   document.getElementById('cartSubtotal').textContent = money(cartTotal());
+}
+
+/* ---------- Selección de adicionales ---------- */
+let addonSelection = { product: null, chosen: [], qty: 1 };
+
+async function openAddonModal(product){
+  addonSelection = { product, chosen: [], qty: 1 };
+  document.getElementById('addonTitle').textContent = product.name;
+  document.getElementById('addonSub').textContent = `Elegí hasta ${product.max_addons} adicional(es) — opcional.`;
+  document.getElementById('addonQtyVal').textContent = '1';
+  document.getElementById('addonOptions').innerHTML = '<p>Cargando opciones...</p>';
+  closeCart();
+  document.getElementById('addonModal').classList.add('open');
+  document.getElementById('overlay').classList.add('visible');
+
+  const { data, error } = await db.from('product_addons').select('*').eq('product_id', product.id).eq('active', true).order('name');
+  const options = (!error && data) ? data : [];
+  renderAddonOptions(options, product.max_addons);
+}
+
+function renderAddonOptions(options, maxAddons){
+  const wrap = document.getElementById('addonOptions');
+  if (!options.length){
+    wrap.innerHTML = '<p>No hay adicionales disponibles ahora mismo.</p>';
+    return;
+  }
+  wrap.innerHTML = options.map(a => `
+    <label style="display:flex; align-items:center; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--cream-100); cursor:pointer;">
+      <span><input type="checkbox" data-addon-name="${a.name}" data-addon-price="${a.price}" style="margin-right:10px;">${a.name}</span>
+      <strong>+ ${money(a.price)}</strong>
+    </label>
+  `).join('');
+
+  wrap.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+    cb.addEventListener('change', () => {
+      const checked = wrap.querySelectorAll('input[type="checkbox"]:checked');
+      if (checked.length > Number(maxAddons)){
+        cb.checked = false;
+        announce(`Solo podés elegir hasta ${maxAddons} adicional(es)`);
+        return;
+      }
+      addonSelection.chosen = Array.from(checked).map(c => ({ name: c.dataset.addonName, price: Number(c.dataset.addonPrice) }));
+    });
+  });
+}
+
+document.getElementById('addonQtyPlus').addEventListener('click', () => {
+  addonSelection.qty += 1;
+  document.getElementById('addonQtyVal').textContent = addonSelection.qty;
+});
+document.getElementById('addonQtyMinus').addEventListener('click', () => {
+  if (addonSelection.qty <= 1) return;
+  addonSelection.qty -= 1;
+  document.getElementById('addonQtyVal').textContent = addonSelection.qty;
+});
+document.getElementById('addonConfirmBtn').addEventListener('click', () => {
+  addToCartWithAddons(addonSelection.product, addonSelection.qty, addonSelection.chosen);
+  closeAddonModal();
+  openCart();
+});
+document.getElementById('addonClose').addEventListener('click', closeAddonModal);
+function closeAddonModal(){
+  document.getElementById('addonModal').classList.remove('open');
+  document.getElementById('overlay').classList.remove('visible');
 }
 
 /* ---------- Drawer / modal open-close ---------- */
@@ -813,7 +922,7 @@ document.getElementById('checkoutForm').addEventListener('submit', async (e) => 
     }).select().single();
     if (orderError) throw orderError;
 
-    const items = CART.map(i => ({ order_id: order.id, product_id: i.id, quantity: i.qty, unit_price: i.price }));
+    const items = CART.map(i => ({ order_id: order.id, product_id: i.id, quantity: i.qty, unit_price: i.price, addons: i.addons || [] }));
     const { error: itemsError } = await db.from('order_items').insert(items);
     if (itemsError) throw itemsError;
 
