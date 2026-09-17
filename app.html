@@ -319,30 +319,40 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   const msg = document.getElementById('loginMsg');
   msg.style.color = ''; msg.textContent = 'Ingresando...';
-  const { error } = await db.auth.signInWithPassword({
-    email: document.getElementById('loginEmail').value,
-    password: document.getElementById('loginPass').value,
-  });
-  if (error){ msg.style.color = '#B32656'; msg.textContent = 'No pudimos iniciar sesión: ' + error.message; return; }
-  await bootstrap();
+  try{
+    const { error } = await db.auth.signInWithPassword({
+      email: document.getElementById('loginEmail').value,
+      password: document.getElementById('loginPass').value,
+    });
+    if (error){ msg.style.color = '#B32656'; msg.textContent = 'No pudimos iniciar sesión: ' + error.message; return; }
+    await bootstrap();
+  }catch(err){
+    msg.textContent = '';
+    openMaintenanceModal();
+  }
 });
 
 document.getElementById('signupForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   const msg = document.getElementById('signupMsg');
   msg.textContent = 'Creando cuenta...';
-  const { error } = await db.auth.signUp({
-    email: document.getElementById('suEmail').value,
-    password: document.getElementById('suPass').value,
-    options: { data: {
-      first_name: document.getElementById('suFirst').value,
-      last_name: document.getElementById('suLast').value,
-      phone: document.getElementById('suPhone').value,
-      address: document.getElementById('suAddress').value || null,
-    }}
-  });
-  if (error){ msg.style.color = '#B32656'; msg.textContent = 'No pudimos crear la cuenta: ' + error.message; return; }
-  await bootstrap();
+  try{
+    const { error } = await db.auth.signUp({
+      email: document.getElementById('suEmail').value,
+      password: document.getElementById('suPass').value,
+      options: { data: {
+        first_name: document.getElementById('suFirst').value,
+        last_name: document.getElementById('suLast').value,
+        phone: document.getElementById('suPhone').value,
+        address: document.getElementById('suAddress').value || null,
+      }}
+    });
+    if (error){ msg.style.color = '#B32656'; msg.textContent = 'No pudimos crear la cuenta: ' + error.message; return; }
+    await bootstrap();
+  }catch(err){
+    msg.textContent = '';
+    openMaintenanceModal();
+  }
 });
 
 document.getElementById('logoutBtn').addEventListener('click', async () => {
@@ -350,29 +360,51 @@ document.getElementById('logoutBtn').addEventListener('click', async () => {
   window.location.reload();
 });
 
+/* ---------- Modal de mantenimiento ---------- */
+let maintenanceShown = false;
+function openMaintenanceModal(){
+  maintenanceShown = true;
+  showModal(`
+    <div style="text-align:center;">
+      <div style="font-size:2.6rem; margin-bottom:6px;" aria-hidden="true">🛠️🍪</div>
+      <h3>Estamos actualizando el sistema</h3>
+      <p style="color:var(--brown-800);">Por unos minutos no podemos procesar el login ni mostrar tus pedidos. Escribinos por WhatsApp y te ayudamos al toque.</p>
+      <a class="btn btn-primary" style="width:100%; justify-content:center; margin-top:10px;" href="https://wa.me/5491130730496?text=Hola!%20Necesito%20ayuda%2C%20vi%20que%20el%20sistema%20est%C3%A1%20en%20actualizaci%C3%B3n." target="_blank" rel="noopener">💬 Escribir por WhatsApp</a>
+    </div>
+  `);
+}
+function showMaintenanceModal(){
+  if (maintenanceShown) return;
+  openMaintenanceModal();
+}
+
 /* ---------- Bootstrap: decide qué vista mostrar ---------- */
 async function bootstrap(){
-  const { data } = await db.auth.getSession();
-  session = data.session;
-  if (!session){
-    document.getElementById('authSection').classList.remove('hidden');
-    document.getElementById('clientSection').classList.add('hidden');
-    document.getElementById('adminSection').classList.add('hidden');
-    document.getElementById('logoutBtn').classList.add('hidden');
-    return;
-  }
-  document.getElementById('authSection').classList.add('hidden');
-  document.getElementById('logoutBtn').classList.remove('hidden');
+  try{
+    const { data } = await db.auth.getSession();
+    session = data.session;
+    if (!session){
+      document.getElementById('authSection').classList.remove('hidden');
+      document.getElementById('clientSection').classList.add('hidden');
+      document.getElementById('adminSection').classList.add('hidden');
+      document.getElementById('logoutBtn').classList.add('hidden');
+      return;
+    }
+    document.getElementById('authSection').classList.add('hidden');
+    document.getElementById('logoutBtn').classList.remove('hidden');
 
-  const { data: prof } = await db.from('profiles').select('*').eq('id', session.user.id).single();
-  profile = prof;
+    const { data: prof } = await db.from('profiles').select('*').eq('id', session.user.id).single();
+    profile = prof;
 
-  if (profile && profile.role === 'admin'){
-    document.getElementById('adminSection').classList.remove('hidden');
-    initAdmin();
-  } else {
-    document.getElementById('clientSection').classList.remove('hidden');
-    initClient();
+    if (profile && profile.role === 'admin'){
+      document.getElementById('adminSection').classList.remove('hidden');
+      initAdmin();
+    } else {
+      document.getElementById('clientSection').classList.remove('hidden');
+      initClient();
+    }
+  }catch(err){
+    showMaintenanceModal();
   }
 }
 
