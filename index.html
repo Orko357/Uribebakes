@@ -555,12 +555,23 @@
   <button type="button" class="btn btn-primary" id="addonConfirmBtn" style="width:100%; justify-content:center;">Agregar al carrito</button>
 </div>
 
+<!-- MODAL DE MANTENIMIENTO -->
+<div class="modal" id="maintenanceModal" role="dialog" aria-modal="true" aria-labelledby="maintenanceTitle">
+  <button class="modal-close" id="maintenanceClose" aria-label="Cerrar">✕</button>
+  <div style="text-align:center;">
+    <div style="font-size:2.6rem; margin-bottom:6px;" aria-hidden="true">🛠️🍪</div>
+    <h3 id="maintenanceTitle">Estamos actualizando el sistema</h3>
+    <p class="modal-sub">Por unos minutos no podemos procesar pedidos online desde la web. ¡No te quedes sin tus cookies! Escribinos por WhatsApp y coordinamos tu pedido al toque.</p>
+    <a class="btn btn-primary" style="width:100%; justify-content:center; margin-top:6px;" href="https://wa.me/5491130730496?text=Hola!%20Quiero%20hacer%20un%20pedido%2C%20vi%20que%20la%20web%20est%C3%A1%20en%20actualizaci%C3%B3n." target="_blank" rel="noopener">💬 Pedir por WhatsApp</a>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
 document.getElementById('year').textContent = new Date().getFullYear();
 
 /* ---------- Supabase ---------- */
-const SUPABASE_URL = 'https://estonofunciona.supabase.co';
+const SUPABASE_URL = 'https://rhmorkusgqfakpevrpae.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_0xJChGzFKMNZ0Ap5dNLxMg_E15EMa7P';
 const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -586,6 +597,23 @@ const FALLBACK_PRODUCTS = [
 let PRODUCTS = [];
 let activeCategory = 'Todas';
 
+/* ---------- Modal de mantenimiento ---------- */
+let maintenanceShown = false;
+function openMaintenanceModal(){
+  maintenanceShown = true;
+  closeCart(); closeCheckout(); closeAddonModal();
+  document.getElementById('maintenanceModal').classList.add('open');
+  document.getElementById('overlay').classList.add('visible');
+}
+function showMaintenanceModal(){
+  if (maintenanceShown) return;
+  openMaintenanceModal();
+}
+document.getElementById('maintenanceClose').addEventListener('click', () => {
+  document.getElementById('maintenanceModal').classList.remove('open');
+  document.getElementById('overlay').classList.remove('visible');
+});
+
 /* ---------- Cargar catálogo ---------- */
 async function loadProducts(){
   const statusEl = document.getElementById('catalogStatus');
@@ -596,6 +624,7 @@ async function loadProducts(){
   }catch(e){
     PRODUCTS = FALLBACK_PRODUCTS;
     statusEl.textContent = 'Mostrando catálogo de referencia (sin conexión con la base de datos).';
+    showMaintenanceModal();
   }
   renderTabs();
   renderGrid();
@@ -950,6 +979,7 @@ document.getElementById('checkoutForm').addEventListener('submit', async (e) => 
     msg.style.color = '#B32656';
     msg.textContent = 'No pudimos confirmar el pedido: ' + (err.message || 'error desconocido');
     submitBtn.disabled = false;
+    openMaintenanceModal();
   }
 });
 
