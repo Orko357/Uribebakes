@@ -833,6 +833,7 @@ function closeCart(){
 function openCheckout(){
   if (CART.length === 0){ announce('Tu carrito está vacío'); return; }
   closeCart();
+  toggleAuthFields();
   checkoutModal.classList.add('open');
   overlay.classList.add('visible');
 }
@@ -879,7 +880,10 @@ db.auth.getSession().then(({ data }) => {
   toggleAuthFields();
 });
 function toggleAuthFields(){
-  document.getElementById('authFields').classList.toggle('hidden', !!currentSession);
+  const hasSession = !!currentSession;
+  document.getElementById('authFields').classList.toggle('hidden', hasSession);
+  document.getElementById('chkEmail').required = !hasSession;
+  document.getElementById('chkPass').required = !hasSession;
 }
 
 document.getElementById('checkoutForm').addEventListener('submit', async (e) => {
